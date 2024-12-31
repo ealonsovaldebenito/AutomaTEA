@@ -1,0 +1,26 @@
+## Phishing Investigation
+
+Ticket Number: 
+Client: 
+Details:
+- Observed Phishing Emails
+- Associated IPs
+- Domain Details
+
+## Actions Taken
+1. Blocked IP
+2. 
+
+
+
+
+
+####
+
+
+ 
+#####
+
+ADDITIONAL
+
+### HISTORICAL

@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Phishing Investigation",
+        "content": "## Phishing Investigation\n\nTicket Number: \nClient: \nDetails:\n- Observed Phishing Emails\n- Associated IPs\n- Domain Details\n\n## Actions Taken\n1. Blocked IP\n2. Alerted Client SOC"
+    },
+    {
+        "name": "Malware Analysis",
+        "content": "## Malware Analysis\n\nTicket Number: \nClient: \nDetails:\n- Malware Hash:\n- Affected Machines:\n- Remediation Steps:\n\n## Findings\n1. Malware Type: \n2. Spread Vector:"
+    }
+]

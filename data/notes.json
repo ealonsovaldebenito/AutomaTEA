@@ -1,0 +1,48 @@
+[
+    {
+        "id": "1",
+        "name": "Default Note",
+        "content": "This is the content of the default note.ssssss",
+        "timestamp": "2024-12-30 15:32:46",
+        "tags": [
+            "default",
+            "example"
+        ],
+        "related_modules": {
+            "queries": [
+                "Query 1",
+                "Query 2"
+            ],
+            "tasks": [
+                "Task A",
+                "Task B"
+            ]
+        }
+    },
+    {
+        "id": "2",
+        "name": "testasdafsdas",
+        "tags": [
+            "test",
+            "sadfsadas"
+        ],
+        "content": "test",
+        "timestamp": "2024-12-31 11:33:14"
+    },
+    {
+        "id": "3",
+        "name": "test",
+        "tags": [
+            "test"
+        ],
+        "content": "test",
+        "timestamp": "2024-12-31 11:31:18"
+    },
+    {
+        "id": "3a9e3b1c-c023-4cc3-854b-f457271b21a7",
+        "name": "hola",
+        "content": "hola",
+        "timestamp": "2024-12-31 11:32:56",
+        "tags": []
+    }
+]

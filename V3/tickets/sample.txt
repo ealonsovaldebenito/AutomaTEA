@@ -1,0 +1,35 @@
+Ticket Number: CS080492
+Account: EDU
+Short Description: ShortEdu
+TUC: TUC0804
+Severity: 3
+Assigned To: L1 Team
+
+## Phishing Investigation
+
+Ticket Number: 
+Client: 
+Details:
+- Observed Phishing Emails
+- Associated IPs
+- Domain Details
+
+## Actions Taken
+1. Blocked IP
+2. Alerted Client SOC
+
+IP: 192.168.1.1
+Host: www.host.cl
+email: test@test.cl
+hash: mio231j41ifisas923
+user: Testing
+
+####
+
+ROOT CAUSE: What, when, where, why, who
+ 
+#####
+
+ADDITIONAL
+
+### HISTORICAL

@@ -1,0 +1,35 @@
+[
+    {
+        "id": "QRY001",
+        "name": "Failed Login Attempts",
+        "category": "Interactive Login",
+        "platform": "Sentinel Azure",
+        "content": "SecurityEvent | where EventID == 4625",
+        "objective": "Identify failed login attempts on critical servers.",
+        "description": "This query helps detect repeated failed login attempts which may indicate brute force attacks.",
+        "associated_tucs": [
+            "TUC123",
+            "TUC789"
+        ]
+    },
+    {
+        "id": "QRY002",
+        "name": "Suspicious Network Traffic",
+        "category": "Network Info",
+        "platform": "QRadar",
+        "content": "SELECT * FROM flows WHERE bytes > 1000000",
+        "objective": "Detect unusual high-volume network traffic.",
+        "description": "Query to monitor excessive traffic that could indicate data exfiltration or DDoS.",
+        "associated_tucs": "['TUC456']"
+    },
+    {
+        "id": "QRY003",
+        "name": "Risky User Activity",
+        "category": "Risk Identity",
+        "platform": "Splunk",
+        "content": "index=main sourcetype=access_combined | stats count by user",
+        "objective": "Monitor user activity for anomalous behavior.",
+        "description": "Aggregates user activity and identifies users with unusual access patterns.",
+        "associated_tucs": "[]"
+    }
+]

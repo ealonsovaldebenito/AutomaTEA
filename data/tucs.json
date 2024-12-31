@@ -1,0 +1,34 @@
+[
+    {
+        "name": "TUC123",
+        "category": "Phishing",
+        "clients": [
+            "Client A"
+        ]
+    },
+    {
+        "name": "TUC456",
+        "category": "Malware",
+        "clients": [
+            "Client B",
+            "Client C"
+        ]
+    },
+    {
+        "name": "TUC789",
+        "category": "Unauthorized Access",
+        "clients": [
+            "Client A",
+            "Client D"
+        ]
+    },
+    {
+        "name": "safasd"
+    },
+    {
+        "name": "TUC0803"
+    },
+    {
+        "name": "TUC0804"
+    }
+]

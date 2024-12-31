@@ -1,0 +1,6 @@
+Ticket Number: TicketNumberPrueba
+Account: CuentaPrueba
+Short Description: ShortDescriptionPrueba
+TUC: TUCPrueba
+Severity: 3
+Assigned To: L1 Team

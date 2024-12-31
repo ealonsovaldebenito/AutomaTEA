@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Incident Analysis",
+        "format": "On {when}, the alert '{what}' was triggered at {where}. The investigation determined that the root cause was '{why}', involving '{who}'."
+    },
+    {
+        "name": "Security Alert",
+        "format": "On {when}, the security event '{what}' occurred at {where}. Analysis identified '{why}' as the cause, with actions involving '{who}'."
+    },
+    {
+        "name": "Operational Event",
+        "format": "At {where} on {when}, the event '{what}' was identified. The root cause analysis pointed to '{why}', with contributions from '{who}'."
+    }
+]

@@ -1,0 +1,23 @@
+Ticket Number: TicketTest123
+Account: Prueba
+Short Description: PRUEBATUC123
+TUC: TUC123
+Severity: 3
+Assigned To: L1 Team
+
+## Malware Analysis
+
+Ticket Number: 
+Client: 
+Details:
+- Malware Hash:
+- Affected Machines:
+- Remediation Steps:
+
+## Findings
+1. Malware Type: 
+2. Spread Vector:
+
+
+IPSource: 192.168.1.1
+Host: www.hostname.cl

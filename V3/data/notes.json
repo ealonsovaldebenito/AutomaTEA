@@ -1,0 +1,54 @@
+[
+    {
+        "name": "Default Note",
+        "content": "This is the content of the default note.ssssss",
+        "timestamp": "2024-12-30 15:32:46",
+        "tags": [
+            "default",
+            "example"
+        ],
+        "related_modules": {
+            "queries": [
+                "Query 1",
+                "Query 2"
+            ],
+            "tasks": [
+                "Task A",
+                "Task B"
+            ]
+        }
+    },
+    {
+        "name": "Network Troubleshooting Note",
+        "content": "This note contains steps to troubleshoot network issues.sss",
+        "timestamp": "2024-12-30 15:32:32",
+        "tags": [
+            "network",
+            "troubleshooting"
+        ],
+        "related_modules": {
+            "queries": [
+                "Network Device Info"
+            ],
+            "tasks": [
+                "Network Check Task"
+            ]
+        }
+    },
+    {
+        "name": "Nueva Nota",
+        "tags": [],
+        "content": "Nueva Nota",
+        "timestamp": "2024-12-30 18:39:53"
+    },
+    {
+        "name": "Nota Nueva",
+        "tags": [
+            "Cliente A",
+            "Cliente B",
+            "TUC0804"
+        ],
+        "content": "",
+        "timestamp": "2024-12-30 18:48:11"
+    }
+]
