@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, messagebox
 import json
 import os
+import uuid
 from datetime import datetime
 
 
@@ -19,7 +20,7 @@ class NotesModule:
 
     def build(self):
         # Main Frame
-        frame = ttk.LabelFrame(self.parent, text="Notes")
+        frame = ttk.LabelFrame(self.parent, text="Notas")
         frame.grid(
             row=self.row_start,
             column=self.col_start,
@@ -38,14 +39,14 @@ class NotesModule:
         controls_frame.columnconfigure(0, weight=1)
 
         # Search Bar
-        ttk.Label(controls_frame, text="Search:").grid(row=0, column=0, sticky="w", padx=2)
+        ttk.Label(controls_frame, text="Buscar:").grid(row=0, column=0, sticky="w", padx=2)
         self.search_entry = ttk.Entry(controls_frame, width=30)
         self.search_entry.grid(row=0, column=1, sticky="ew", padx=2)
-        ttk.Button(controls_frame, text="Search", command=self.filter_notes).grid(row=0, column=2, sticky="w", padx=2)
+        ttk.Button(controls_frame, text="Buscar", command=self.filter_notes).grid(row=0, column=2, sticky="w", padx=2)
 
         # Buttons
-        ttk.Button(controls_frame, text="New Note", command=self.new_note, width=12).grid(row=0, column=3, sticky="e", padx=2)
-        ttk.Button(controls_frame, text="Delete Note", command=self.delete_note, width=12).grid(row=0, column=4, sticky="e", padx=2)
+        ttk.Button(controls_frame, text="Nueva Nota", command=self.new_note, width=12).grid(row=0, column=3, sticky="e", padx=2)
+        ttk.Button(controls_frame, text="Eliminar Nota", command=self.delete_note, width=12).grid(row=0, column=4, sticky="e", padx=2)
 
         # Treeview for Notes
         tree_frame = ttk.Frame(frame)
@@ -61,15 +62,15 @@ class NotesModule:
         self.tree.config(yscrollcommand=scrollbar.set)
 
         # Configure Treeview Columns
-        self.tree.heading("name", text="Name")
-        self.tree.heading("timestamp", text="Timestamp")
-        self.tree.heading("tags", text="Tags")
+        self.tree.heading("name", text="Nombre")
+        self.tree.heading("timestamp", text="Fecha y Hora")
+        self.tree.heading("tags", text="Etiquetas")
         self.tree.column("name", width=150, anchor="w")
         self.tree.column("timestamp", width=120, anchor="center")
         self.tree.column("tags", width=150, anchor="center")
 
         self.load_notes()
-        self.tree.bind("<<TreeviewSelect>>", self.open_note_details)
+        self.tree.bind("<Double-1>", self.open_note_details)  # Ahora requiere doble clic para abrir detalles
 
     def load_notes(self):
         """Load notes from the JSON file."""
@@ -80,7 +81,7 @@ class NotesModule:
                     self.filtered_notes = self.notes[:]
                     self.update_notes_tree()
         except (FileNotFoundError, json.JSONDecodeError):
-            messagebox.showerror("Error", "Failed to load notes file.")
+            messagebox.showerror("Error", "No se pudo cargar el archivo de notas.")
             self.notes = []
             self.filtered_notes = []
 
@@ -114,21 +115,41 @@ class NotesModule:
 
     def new_note(self):
         """Create a new blank note."""
-        self.open_note_editor({"name": "New Note", "content": "", "timestamp": "", "tags": []})
+        new_note = {
+            "id": str(uuid.uuid4()),  # Generar ID único
+            "name": "Nueva Nota",
+            "content": "",
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "tags": [],
+        }
+        self.notes.append(new_note)
+        self.save_notes_to_file()
+        self.update_notes_tree()  # Refrescar después de crear una nueva nota
+        self.open_note_editor(new_note)
 
     def delete_note(self):
         """Delete the selected note."""
         selected_item = self.tree.focus()
         if not selected_item:
-            messagebox.showwarning("Warning", "No note selected!")
+            messagebox.showwarning("Advertencia", "¡No hay ninguna nota seleccionada!")
             return
 
         note_values = self.tree.item(selected_item, "values")
         note_name = note_values[0]
+
+        # Confirmación antes de eliminar
+        confirm = messagebox.askyesno(
+            "Confirmar eliminación",
+            f"¿Estás seguro de que deseas eliminar la nota '{note_name}'?"
+        )
+        if not confirm:
+            return
+
+        # Eliminar la nota si se confirma
         self.notes = [note for note in self.notes if note["name"] != note_name]
         self.save_notes_to_file()
         self.update_notes_tree()
-        messagebox.showinfo("Success", f"Note '{note_name}' deleted successfully!")
+        messagebox.showinfo("Éxito", f"¡Nota '{note_name}' eliminada con éxito!")
 
     def open_note_details(self, event):
         """Open the details of the selected note."""
@@ -146,21 +167,21 @@ class NotesModule:
     def open_note_editor(self, note_data):
         """Open a window to edit a note."""
         editor_window = tk.Toplevel(self.parent)
-        editor_window.title(f"Note: {note_data['name']}")
+        editor_window.title(f"Nota: {note_data['name']}")
         editor_window.geometry("700x500")
         editor_window.resizable(False, False)
 
         # Save Changes Button
-        ttk.Button(editor_window, text="Save Changes", command=lambda: self.save_changes(note_data, editor_window)).pack(fill="x", pady=5)
+        ttk.Button(editor_window, text="Guardar Cambios", command=lambda: self.save_changes(note_data, editor_window)).pack(fill="x", pady=5)
 
         # Note Name
-        ttk.Label(editor_window, text="Note Name:").pack(pady=2)
+        ttk.Label(editor_window, text="Nombre de la Nota:").pack(pady=2)
         self.name_entry = ttk.Entry(editor_window)
         self.name_entry.insert(0, note_data["name"])
         self.name_entry.pack(fill="x", padx=5, pady=2)
 
         # Tags
-        ttk.Label(editor_window, text="Tags (comma-separated):").pack(pady=2)
+        ttk.Label(editor_window, text="Etiquetas (separadas por coma):").pack(pady=2)
         self.tags_entry = ttk.Entry(editor_window)
         self.tags_entry.insert(0, ", ".join(note_data.get("tags", [])))
         self.tags_entry.pack(fill="x", padx=5, pady=2)
@@ -183,31 +204,16 @@ class NotesModule:
         new_content = self.content_text.get("1.0", "end").strip()
         new_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Check if the note already exists in the list (by name)
-        existing_note = next((note for note in self.notes if note["name"] == note_data["name"]), None)
+        # Update existing note
+        note_data["name"] = new_name
+        note_data["tags"] = new_tags
+        note_data["content"] = new_content
+        note_data["timestamp"] = new_timestamp
 
-        if existing_note:
-            # Update existing note
-            existing_note["name"] = new_name
-            existing_note["tags"] = new_tags
-            existing_note["content"] = new_content
-            existing_note["timestamp"] = new_timestamp
-        else:
-            # Add new note if it doesn't exist
-            new_note = {
-                "name": new_name,
-                "tags": new_tags,
-                "content": new_content,
-                "timestamp": new_timestamp,
-            }
-            self.notes.append(new_note)
-
-        # Save to file and update UI
         self.save_notes_to_file()
-        self.update_notes_tree()
-        messagebox.showinfo("Success", "Changes saved successfully!")
+        self.update_notes_tree()  # Refrescar después de guardar cambios
+        messagebox.showinfo("Éxito", "¡Cambios guardados con éxito!")
         editor_window.destroy()
-
 
     def save_notes_to_file(self):
         """Save notes to the JSON file."""

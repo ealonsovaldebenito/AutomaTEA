@@ -1,5 +1,6 @@
 [
     {
+        "id": "1",
         "name": "Default Note",
         "content": "This is the content of the default note.ssssss",
         "timestamp": "2024-12-30 15:32:46",
@@ -19,36 +20,54 @@
         }
     },
     {
-        "name": "Network Troubleshooting Note",
-        "content": "This note contains steps to troubleshoot network issues.sss",
-        "timestamp": "2024-12-30 15:32:32",
+        "id": "2",
+        "name": "testasdafsdas",
         "tags": [
-            "network",
-            "troubleshooting"
+            "test",
+            "sadfsadas"
         ],
-        "related_modules": {
-            "queries": [
-                "Network Device Info"
-            ],
-            "tasks": [
-                "Network Check Task"
-            ]
-        }
+        "content": "test",
+        "timestamp": "2024-12-31 11:33:14"
     },
     {
+        "id": "3",
+        "name": "test",
+        "tags": [
+            "test"
+        ],
+        "content": "test",
+        "timestamp": "2024-12-31 11:31:18"
+    },
+    {
+        "id": "3a9e3b1c-c023-4cc3-854b-f457271b21a7",
+        "name": "hola",
+        "content": "hola",
+        "timestamp": "2024-12-31 11:32:56",
+        "tags": []
+    },
+    {
+        "id": "3850be94-43f4-4631-b422-780e0ce4c536",
         "name": "Nueva Nota",
-        "tags": [],
-        "content": "Nueva Nota",
-        "timestamp": "2024-12-30 18:39:53"
+        "content": "",
+        "timestamp": "2025-01-15 10:49:13",
+        "tags": []
     },
     {
-        "name": "Nota Nueva",
+        "id": "493c6f1b-f435-4aa0-a959-747e86d155f4",
+        "name": "Nueva Nota",
+        "content": "aver",
+        "timestamp": "2025-01-15 13:46:21",
         "tags": [
-            "Cliente A",
-            "Cliente B",
-            "TUC0804"
-        ],
-        "content": "",
-        "timestamp": "2024-12-30 18:48:11"
+            "aver"
+        ]
+    },
+    {
+        "id": "b870c3cf-c8bb-4531-a910-f01999c23172",
+        "name": "aver",
+        "content": "aver",
+        "timestamp": "2025-01-15 13:46:40",
+        "tags": [
+            "aver"
+        ]
     }
 ]

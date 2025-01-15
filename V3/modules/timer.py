@@ -1,9 +1,8 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import time
 from datetime import datetime
 import pytz
-
 
 class TimerModule:
     def __init__(self, parent, row_start, col_start, col_span=1, row_span=1, editor_module=None):
@@ -21,7 +20,6 @@ class TimerModule:
         self.start_time_chile = None
 
     def build(self):
-        # Frame principal
         frame = ttk.LabelFrame(self.parent, text="SLA Timer")
         frame.grid(
             row=self.row_start,
@@ -37,23 +35,15 @@ class TimerModule:
         frame.columnconfigure(2, weight=1)
         frame.rowconfigure(0, weight=1)
 
-        # Display del Timer
         timer_label = ttk.Label(frame, textvariable=self.timer_var, font=("Arial", 18, "bold"), anchor="center")
         timer_label.grid(row=0, column=0, columnspan=3, pady=5, sticky="ew")
 
-        # Botones de control
         ttk.Button(frame, text="Start", command=self.start_timer).grid(row=1, column=0, padx=5, pady=2, sticky="ew")
         ttk.Button(frame, text="Pause", command=self.pause_timer).grid(row=1, column=1, padx=5, pady=2, sticky="ew")
         ttk.Button(frame, text="Reset", command=self.reset_timer).grid(row=1, column=2, padx=5, pady=2, sticky="ew")
 
-        # Botón para enviar hora de inicio
-        ttk.Button(frame, text="Submit Start Time", command=self.submit_start_time).grid(
-            row=2, column=0, columnspan=3, padx=5, pady=5, sticky="ew"
-        )
-
-        # Display de Timestamp
         timestamp_label = ttk.Label(frame, textvariable=self.timestamp_var, font=("Arial", 10), anchor="center")
-        timestamp_label.grid(row=3, column=0, columnspan=3, pady=5, sticky="ew")
+        timestamp_label.grid(row=2, column=0, columnspan=3, pady=5, sticky="ew")
 
     def start_timer(self):
         if not self.timer_running:
@@ -92,24 +82,10 @@ class TimerModule:
         canada_time = now_utc.astimezone(canada_tz).strftime("%H:%M:%S")
 
         self.timestamp_var.set(f"Chile: {chile_time} | Canada: {canada_time}")
+        if self.timer_running:
+            self.parent.after(30000, self.update_timestamps)  # Actualiza cada 30 seg
 
     def get_chile_time(self):
-        """Obtain the current time in Chile's timezone."""
         chile_tz = pytz.timezone("America/Santiago")
         now_utc = datetime.now(pytz.utc)
         return now_utc.astimezone(chile_tz).strftime("%H:%M:%S")
-
-    def submit_start_time(self):
-        """Send the start time in Chilean format to the editor module."""
-        if not self.start_time_chile:
-            messagebox.showwarning("No Start Time", "Timer has not been started.")
-            return
-
-        details = f"######## TICKET DETAILS ########\nStart Time (Chile): {self.start_time_chile}\n"
-        details += "######## INVESTIGATION DETAILS ########\n\n"
-
-        if self.editor_module and hasattr(self.editor_module, "editor_box") and self.editor_module.editor_box:
-            self.editor_module.editor_box.insert("1.0", details)
-            messagebox.showinfo("Success", "Start time sent to the editor!")
-        else:
-            messagebox.showerror("Error", "Editor module is not properly configured or missing.")

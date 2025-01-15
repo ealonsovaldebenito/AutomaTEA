@@ -83,7 +83,7 @@ class QueriesModule:
         self.tree.column("objective", width=150, anchor="w")
 
         self.load_queries()
-        self.tree.bind("<<TreeviewSelect>>", self.open_query_details)
+        self.tree.bind("<Double-1>", self.open_query_details)  # Doble clic para abrir detalles
 
     def load_queries(self):
         """Load queries from the JSON file."""
@@ -107,12 +107,7 @@ class QueriesModule:
             self.tree.insert(
                 "",
                 "end",
-                values=(
-                    query["name"],
-                    query["platform"],
-                    query["category"],
-                    query["objective"],
-                ),
+                values=(query["name"], query["platform"], query["category"], query["objective"]),
             )
 
     def filter_queries(self):
@@ -123,10 +118,9 @@ class QueriesModule:
 
         self.filtered_queries = [
             query for query in self.queries
-            if (search_text in query["name"].lower()
-                or search_text in query["description"].lower()
-                or search_text in query["content"].lower()
-                or search_text in query.get("objective", "").lower())
+            if (
+                any(search_text in str(query.get(field, "")).lower() for field in ["name", "description", "content", "objective", "tuc", "ticket_number"])
+            )
             and (category == "All" or query["category"] == category)
             and (siem == "All" or query["platform"] == siem)
         ]
@@ -157,17 +151,17 @@ class QueriesModule:
         """Open a window to edit a query."""
         details_window = tk.Toplevel(self.parent)
         details_window.title(f"Query: {query_data['name']}")
-        details_window.geometry("600x400")
+        details_window.geometry("600x500")
         details_window.resizable(False, False)
 
         ttk.Label(details_window, text="Edit Query", font=("Arial", 14, "bold")).pack(pady=5)
 
         # Editable fields
-        fields = ["name", "category", "platform", "objective", "description", "content"]
+        fields = ["name", "category", "platform", "objective", "description", "content", "tuc", "ticket_number"]
         entries = {}
 
         for field in fields:
-            ttk.Label(details_window, text=field.capitalize()).pack(pady=2, anchor="w")
+            ttk.Label(details_window, text=field.replace("_", " ").capitalize()).pack(pady=2, anchor="w")
             entry = ttk.Entry(details_window)
             entry.insert(0, str(query_data.get(field, "")))
             entry.pack(fill="x", padx=5, pady=2)

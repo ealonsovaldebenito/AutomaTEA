@@ -1,5 +1,5 @@
 import os
-from ui_main import AutomaTEAApp
+from automatea import AutomaTEAApp
 
 def main():
     # Crear carpetas necesarias si no existen

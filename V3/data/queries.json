@@ -10,7 +10,9 @@
         "associated_tucs": [
             "TUC123",
             "TUC789"
-        ]
+        ],
+        "tuc": "",
+        "ticket_number": ""
     },
     {
         "id": "QRY002",
@@ -20,7 +22,9 @@
         "content": "SELECT * FROM flows WHERE bytes > 1000000",
         "objective": "Detect unusual high-volume network traffic.",
         "description": "Query to monitor excessive traffic that could indicate data exfiltration or DDoS.",
-        "associated_tucs": "['TUC456']"
+        "associated_tucs": "['TUC456']",
+        "tuc": "",
+        "ticket_number": ""
     },
     {
         "id": "QRY003",
@@ -30,6 +34,8 @@
         "content": "index=main sourcetype=access_combined | stats count by user",
         "objective": "Monitor user activity for anomalous behavior.",
         "description": "Aggregates user activity and identifies users with unusual access patterns.",
-        "associated_tucs": "[]"
+        "associated_tucs": "[]",
+        "tuc": "",
+        "ticket_number": ""
     }
 ]
