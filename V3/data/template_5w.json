@@ -10,5 +10,13 @@
     {
         "name": "Operational Event",
         "format": "At {where} on {when}, the event '{what}' was identified. The root cause analysis pointed to '{why}', with contributions from '{who}'."
+    },
+    {
+        "name": "aaaa",
+        "format": "Root Cause Analysis:\n{what}\n{when}\n{where}\n{why}\n{who}"
+    },
+    {
+        "name": "test",
+        "format": "Root Cause Analysis:\n{what}\n{when}\n{where}\n{why}\n{who}"
     }
 ]

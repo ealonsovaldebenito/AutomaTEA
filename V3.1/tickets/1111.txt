@@ -1,0 +1,17 @@
+Ticket Number: 0000000
+Account: 000ACCOUNT
+Short Description: 000SHORT
+TUC: 000TUC
+Severity: 0
+Assigned To: L2 Team
+
+## Phishing Investigation
+
+SourceIP : 64.22.110.7
+HostIP: 192.168.1.1
+Email: test@test.cl
+User: eduardo@test.cl
+
+ROOT CAUSE
+
+On [12/12/24], the alert '[Phishing]' was triggered at [test@test.cl]. The investigation determined that the root cause was '[open link]', involving '[eduardo@test.cl]'.

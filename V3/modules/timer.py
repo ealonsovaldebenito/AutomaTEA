@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 import pytz
 
+
 class TimerModule:
     def __init__(self, parent, row_start, col_start, col_span=1, row_span=1, editor_module=None):
         self.parent = parent
@@ -18,6 +19,7 @@ class TimerModule:
         self.timer_var = tk.StringVar(value="00:00:00")
         self.timestamp_var = tk.StringVar(value="Chile: --:-- | Canada: --:--")
         self.start_time_chile = None
+        self.time_worked_seconds = 0 
 
     def build(self):
         frame = ttk.LabelFrame(self.parent, text="SLA Timer")
@@ -56,21 +58,23 @@ class TimerModule:
     def pause_timer(self):
         if self.timer_running:
             self.timer_running = False
-            self.paused_time = time.time() - self.start_time
+            elapsed_time = time.time() - self.start_time
+            self.time_worked_seconds += elapsed_time  
+            self.paused_time = self.time_worked_seconds  
+            self.timer_var.set(self.format_time(self.time_worked_seconds))
 
     def reset_timer(self):
         self.timer_running = False
+        self.time_worked_seconds = 0
         self.paused_time = 0
+        self.start_time = 0
         self.timer_var.set("00:00:00")
-        self.timestamp_var.set("Chile: --:-- | Canada: --:--")
-        self.start_time_chile = None
 
     def update_timer(self):
         if self.timer_running:
             elapsed_time = time.time() - self.start_time
-            hours, remainder = divmod(elapsed_time, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            self.timer_var.set(f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}")
+            total_time = self.time_worked_seconds + elapsed_time
+            self.timer_var.set(self.format_time(total_time))
             self.parent.after(500, self.update_timer)
 
     def update_timestamps(self):
@@ -83,9 +87,22 @@ class TimerModule:
 
         self.timestamp_var.set(f"Chile: {chile_time} | Canada: {canada_time}")
         if self.timer_running:
-            self.parent.after(30000, self.update_timestamps)  # Actualiza cada 30 seg
+            self.parent.after(1000, self.update_timestamps) 
 
     def get_chile_time(self):
         chile_tz = pytz.timezone("America/Santiago")
         now_utc = datetime.now(pytz.utc)
         return now_utc.astimezone(chile_tz).strftime("%H:%M:%S")
+
+    def get_time_worked(self):
+        if self.timer_running:
+            elapsed_time = time.time() - self.start_time
+            total_time = self.time_worked_seconds + elapsed_time
+            return self.format_time(total_time)
+        return self.format_time(self.time_worked_seconds)
+
+    def format_time(self, total_seconds):
+        """Formatea segundos totales en HH:MM:SS"""
+        hours, remainder = divmod(int(total_seconds), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"{hours:02}:{minutes:02}:{seconds:02}"

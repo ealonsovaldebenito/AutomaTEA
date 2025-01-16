@@ -1,0 +1,47 @@
+Necesito: Un software para gestionar el tiempo, creación, investigación y trackiking de tickets de soporte para un SOC de ciberseguridad.
+El software debe ser intuitivo, debe ser claro, tener todo a mano y de fácil uso para investigar y tener información a mano.
+
+Modulo Timer:
+Timer que tengan start/resume, Pause, Stop 
+
+Modulo inputs: Se deben ingresar parámetros bases de la investigación, tales como:
+- Numero Ticket (Obligatorio)
+- Account (Cliente) (Obligatorio)
+- Short Description (Obligatorio)
+- TUC 
+- Severidad (del 1 al 4)
+- Asignado a: (L1, L2, Infra, MD)
+
+
+Modulo Ticket:
+
+Un editor de texto donde yo tenga la posibilidad de escribir la investigación de mi ticket, esto puede partir en blanco o a traves de un template que yo tenga predefinido.
+Este ticket puedo poder hacerle defang, también necesito que automáticamente me vaya rescatando información desde este ticket (todo lo que este entre los ":",, yo pondré por ejemplo IP: 192.168.xx.xx HOST: www.host.cl Nombre: Usuario, etc etc... y debo poder obtener todo esto, desde los : hacia la izquierda, al menos 2 caracteres validos, hacia la derecha al menos 2 luego de un espacio, idealmente si tiene  "editor html"
+
+
+
+Necesito la opción de defang y desacher defang (agregar corchetes a los puntos y cambiar http por httx o httxs.
+
+El ticket puedo guardarlo, en mi carpeta /tickets/ manteniendo nomenclatura como: 
+
+Tener botones Guardar / Limpiar / Cargar 
+
+Modulo History: El histórico debe tener registro del histórico de Tickets realizados y visualizador de este, permitir tener filtros predefinidos por (Cuenta/Cliente, TUC, rango de fecha, categoria)
+
+Modulo Notes: Permitir tener Notas, las cuales puedo guardar, cargar, limpiar.
+El modulo debe ser un visualizador y tener "tabs" con las notas "abiertas", que puedo cerrarlas.
+
+Osint: Neceisto un modulo donde yo pueda seleccionar de un desplegable la lista de herramientas osint, ingresar el parámetro de value (puede ser ip, url, hash), seleccionar la herramienta y botón "Buscar", lo que nos llevara a la pagina correspondiente con la nbusqeda correspondiente en nuestro navegador 
+
+Parser: Necesito un modulo (que se abra presionando un botón) y nos permita ingresar un texto, de una lista seleccionar el método de "parseo" y según este, realizarlo. rear al menos 3 prototipos de parseo de prueba.
+
+Queries: Distintos Siem utilizan distintas query, cada cliente puede tener distintos siem, por tanto en mi archivos de queryes debo tener almacenadas las queries que yo manualmente ire guardando, asi cuando a futuro tenga un ticket de siem y tuc similar, pueda ver las queries que utilice previamente.
+
+
+Archivos json
+
+Templates: Yo puedo tener "n" templates, con distinto nombre y para distintas categorías, se deben guardar y poder invocarlos para usarlos como plantilla.
+Account: Permiter tener el registro de cuentas/clientes, Nombre, url de siem (una o mas)
+TUC: Permite guardar las TUC, estas pueden estar asociadas a clientes, categorías
+Osint: Lista de distintas herramientas para realizar osint (virustotal, abuseipdb, ciscotalos, ibmxforce, etc etc)
+Queryes: queryes asociadas a clientes, tuc y siem

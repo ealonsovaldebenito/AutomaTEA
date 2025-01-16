@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json
+import uuid
 
 
 class RootCauseModule:
@@ -19,7 +20,7 @@ class RootCauseModule:
         self.where = tk.StringVar()
         self.why = tk.StringVar()
         self.who = tk.StringVar()
-        self.preview_text = tk.StringVar()  # Para previsualización
+        self.preview_text = tk.StringVar()
 
     def build(self):
         frame = ttk.LabelFrame(self.parent, text="Root Cause (5W's)")
@@ -32,10 +33,9 @@ class RootCauseModule:
             padx=5,
             pady=5,
         )
-        frame.columnconfigure(0, weight=2)  # Inputs column
-        frame.columnconfigure(1, weight=1)  # Buttons column
+        frame.columnconfigure(0, weight=2)
+        frame.columnconfigure(1, weight=1)
 
-        # Load templates
         self.load_templates()
 
         # Input Fields Frame
@@ -45,26 +45,20 @@ class RootCauseModule:
 
         ttk.Label(input_frame, text="Template:").grid(row=0, column=0, sticky="w", padx=2, pady=1)
         self.template_combo = ttk.Combobox(
-            input_frame, textvariable=self.selected_template, values=[tmpl["name"] for tmpl in self.templates], state="readonly", height=5
+            input_frame,
+            textvariable=self.selected_template,
+            values=[tmpl["name"] for tmpl in self.templates],
+            state="readonly",
+            height=5,
         )
         self.template_combo.grid(row=0, column=1, sticky="ew", padx=2, pady=1)
         if self.templates:
             self.template_combo.set(self.templates[0]["name"])
 
-        ttk.Label(input_frame, text="What:").grid(row=1, column=0, sticky="w", padx=2, pady=1)
-        ttk.Entry(input_frame, textvariable=self.what, width=25).grid(row=1, column=1, sticky="ew", padx=2, pady=1)
-
-        ttk.Label(input_frame, text="When:").grid(row=2, column=0, sticky="w", padx=2, pady=1)
-        ttk.Entry(input_frame, textvariable=self.when, width=25).grid(row=2, column=1, sticky="ew", padx=2, pady=1)
-
-        ttk.Label(input_frame, text="Where:").grid(row=3, column=0, sticky="w", padx=2, pady=1)
-        ttk.Entry(input_frame, textvariable=self.where, width=25).grid(row=3, column=1, sticky="ew", padx=2, pady=1)
-
-        ttk.Label(input_frame, text="Why:").grid(row=4, column=0, sticky="w", padx=2, pady=1)
-        ttk.Entry(input_frame, textvariable=self.why, width=25).grid(row=4, column=1, sticky="ew", padx=2, pady=1)
-
-        ttk.Label(input_frame, text="Who:").grid(row=5, column=0, sticky="w", padx=2, pady=1)
-        ttk.Entry(input_frame, textvariable=self.who, width=25).grid(row=5, column=1, sticky="ew", padx=2, pady=1)
+        fields = [("What", self.what), ("When", self.when), ("Where", self.where), ("Why", self.why), ("Who", self.who)]
+        for idx, (label, var) in enumerate(fields, start=1):
+            ttk.Label(input_frame, text=f"{label}:").grid(row=idx, column=0, sticky="w", padx=2, pady=1)
+            ttk.Entry(input_frame, textvariable=var, width=25).grid(row=idx, column=1, sticky="ew", padx=2, pady=1)
 
         # Buttons Frame
         buttons_frame = ttk.Frame(frame)
@@ -73,6 +67,8 @@ class RootCauseModule:
 
         ttk.Button(buttons_frame, text="Preview", command=self.preview_template).pack(fill="x", padx=2, pady=2)
         ttk.Button(buttons_frame, text="Submit", command=self.submit_to_editor).pack(fill="x", padx=2, pady=2)
+        ttk.Button(buttons_frame, text="Clear", command=self.clear_fields).pack(fill="x", padx=2, pady=2)
+        ttk.Button(buttons_frame, text="Add Template", command=self.add_template).pack(fill="x", padx=2, pady=2)
 
         # Preview Section
         preview_frame = ttk.LabelFrame(frame, text="Preview")
@@ -102,11 +98,11 @@ class RootCauseModule:
             return
 
         formatted_text = template["format"].format(
-            what=f"[{self.what.get()}]",
-            when=f"[{self.when.get()}]",
-            where=f"[{self.where.get()}]",
-            why=f"[{self.why.get()}]",
-            who=f"[{self.who.get()}]",
+            what=self.what.get(),
+            when=self.when.get(),
+            where=self.where.get(),
+            why=self.why.get(),
+            who=self.who.get(),
         )
         self.preview_label.delete("1.0", tk.END)
         self.preview_label.insert("1.0", formatted_text)
@@ -124,3 +120,69 @@ class RootCauseModule:
 
         self.editor_module.editor_box.insert(tk.END, f"\n\nROOT CAUSE\n\n{preview_content}")
         messagebox.showinfo("Success", "5W details added to the editor!")
+
+    def clear_fields(self):
+        """Clear all input fields."""
+        self.what.set("")
+        self.when.set("")
+        self.where.set("")
+        self.why.set("")
+        self.who.set("")
+        self.preview_label.delete("1.0", tk.END)
+
+    def center_window(self, window, width, height):
+        """Center a window on the screen."""
+        window.withdraw()  # Ocultar la ventana mientras se posiciona
+        window.update_idletasks()  # Forzar el cálculo de geometría
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        window.geometry(f"{width}x{height}+{x}+{y}")
+        window.deiconify()  # Mostrar la ventana una vez que esté posicionada
+
+
+    def add_template(self):
+        """Open a dialog to add a new template with a base format."""
+        dialog = tk.Toplevel(self.parent)
+        dialog.title("Add New Template")
+        self.center_window(dialog, 400, 300)  # Asegurarse de que esté centrada
+        dialog.transient(self.parent)
+        dialog.grab_set()
+
+        ttk.Label(dialog, text="Template Name:").pack(pady=5)
+        name_var = tk.StringVar()
+        name_entry = ttk.Entry(dialog, textvariable=name_var)
+        name_entry.pack(fill="x", padx=10, pady=5)
+
+        ttk.Label(dialog, text="Template Format:").pack(pady=5)
+        format_text = tk.Text(dialog, wrap="word", height=8)
+        format_text.insert(
+            "1.0",
+            "Root Cause Analysis:\n"
+            "{what}\n"
+            "{when}\n"
+            "{where}\n"
+            "{why}\n"
+            "{who}\n",
+        )
+        format_text.pack(fill="both", expand=True, padx=10, pady=5)
+
+        def save_template():
+            name = name_var.get().strip()
+            template_format = format_text.get("1.0", "end").strip()
+            if not name or not template_format:
+                messagebox.showerror("Error", "Both fields are required!")
+                return
+
+            new_template = {"name": name, "format": template_format}
+            self.templates.append(new_template)
+            with open(self.json_path, "w", encoding="utf-8") as file:
+                json.dump(self.templates, file, indent=4)
+            self.template_combo["values"] = [tmpl["name"] for tmpl in self.templates]
+            messagebox.showinfo("Success", "Template added successfully!")
+            dialog.destroy()
+
+        ttk.Button(dialog, text="Save", command=save_template).pack(side="left", padx=10, pady=10)
+        ttk.Button(dialog, text="Cancel", command=dialog.destroy).pack(side="right", padx=10, pady=10)
+

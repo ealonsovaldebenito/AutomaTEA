@@ -1,0 +1,58 @@
+[
+    {
+        "name": "VirusTotal",
+        "generate_url": "https://www.virustotal.com/gui/search/"
+    },
+    {
+        "name": "AbuseIPDB",
+        "generate_url": "https://www.abuseipdb.com/check/"
+    },
+    {
+        "name": "IBM X-Force",
+        "generate_url": "https://exchange.xforce.ibmcloud.com/ip/"
+    },
+    {
+        "name": "Browserling",
+        "generate_url": "https://www.browserling.com/"
+    },
+    {
+        "name": "MetaDefenderCloud",
+        "generate_url": "https://metadefender.opswat.com/"
+    },
+    {
+        "name": "VPN Detection Test",
+        "generate_url": "https://ipqualityscore.com/vpn-detection"
+    },
+    {
+        "name": "VPN Proxy Detection",
+        "generate_url": "https://ip.teoh.io/"
+    },
+    {
+        "name": "MyIp",
+        "generate_url": "https://whatismyipaddress.com/"
+    },
+    {
+        "name": "URLScan.io",
+        "generate_url": "https://urlscan.io/"
+    },
+    {
+        "name": "CiscoTalos Intelligence",
+        "generate_url": "https://talosintelligence.com/"
+    },
+    {
+        "name": "TrustedIP DataProvider",
+        "generate_url": "https://trustedsource.org/"
+    },
+    {
+        "name": "LevelBlue Alienvault",
+        "generate_url": "https://otx.alienvault.com/"
+    },
+    {
+        "name": "App.any.run",
+        "generate_url": "https://app.any.run/"
+    },
+    {
+        "name": "InfoByIP (Bulk)",
+        "generate_url": "https://www.infobyip.com/?ip="
+    }
+]

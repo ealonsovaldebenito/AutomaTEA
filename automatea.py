@@ -16,9 +16,11 @@ from modules.footer import FooterModule
 from modules.time_updater import TimeUpdater
 from menu.menu_manager import MenuManager
 
+
 class AutomaTEAApp(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.withdraw()  # Ocultar la ventana hasta que esté configurada
         icon_path = "./assets/icon.ico"
         if os.path.exists(icon_path):
             self.iconbitmap(icon_path)
@@ -31,12 +33,15 @@ class AutomaTEAApp(tk.Tk):
         try:
             self.create_main_layout()
             self.create_menu()
+            self.center_and_zoom_window()  # Centrar y maximizar la ventana
         except Exception as e:
             print(f"Error creating the main layout: {e}")
             self.destroy()
 
         if self.time_updater:
             self.time_updater.update_time()
+
+        self.deiconify()  # Mostrar la ventana después de configurarla
 
     def create_main_layout(self):
         rows, cols = 21, 20
@@ -59,28 +64,57 @@ class AutomaTEAApp(tk.Tk):
 
         AppTitleModule(self, row_start=0, col_start=0, col_span=20).build()
         timer_mod = TimerModule(self, row_start=1, col_start=0, col_span=1, row_span=6)
-        timer_mod.build()        
+        timer_mod.build()
+
         history = HistoryModule(self, row_start=17, col_start=2, col_span=12, row_span=1, data_manager=self.data_manager)
         history.build()
+
         NotesModule(self, row_start=17, col_start=0, col_span=1, row_span=1, data_manager=self.data_manager).build()
-        editor = EditorModule(self, row_start=1, col_start=2, col_span=12, row_span=15,
-                              data_manager=self.data_manager, history_module=history)
+
+        editor = EditorModule(
+            self,
+            row_start=1,
+            col_start=2,
+            col_span=12,
+            row_span=15,
+            data_manager=self.data_manager,
+            history_module=history,
+            timer_module=timer_mod,
+        )
         editor.build()
+
         InputModule(self, row_start=1, col_start=16, col_span=4, row_span=6,
-                    editor_module=editor, data_manager=self.data_manager,timer_module=timer_mod ).build()
+                    editor_module=editor, data_manager=self.data_manager, timer_module=timer_mod).build()
+
         QueriesModule(self, row_start=10, col_start=0, col_span=1, row_span=5,
                       data_manager=self.data_manager).build()
+
         OSINTModule(self, row_start=8, col_start=16, col_span=4, row_span=4, json_path="data/osint.json").build()
-        ef = ExtractFieldsModule(self, row_start=14, col_start=16, col_span=4, row_span=3,
-                                 editor_module=editor)
-        ef.build()
-        editor.set_extract_fields_module(ef)
+
+        ExtractFieldsModule(self, row_start=14, col_start=16, col_span=4, row_span=3, editor_module=editor).build()
+
         RootCauseModule(self, row_start=17, col_start=16, col_span=4, row_span=1,
                         editor_module=editor, json_path="data/template_5w.json").build()
+
         FooterModule(self, row_start=20, col_start=0, col_span=20).build()
+
         self.time_updater = TimeUpdater(self, row_start=19, col_start=0, col_span=20)
         self.time_updater.build()
 
     def create_menu(self):
         self.menu_manager = MenuManager(self)
         self.menu_manager.create_menu()
+
+    def center_and_zoom_window(self):
+        self.update_idletasks()  # Asegurarse de que las dimensiones son correctas
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width // 2) - (self.winfo_width() // 2)
+        y = (screen_height // 2) - (self.winfo_height() // 2)
+        self.geometry(f"+{x}+{y}")  # Centrar la ventana
+        self.state('zoomed')  # Maximizar la ventana
+
+
+if __name__ == "__main__":
+    app = AutomaTEAApp()
+    app.mainloop()

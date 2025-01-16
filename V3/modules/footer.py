@@ -14,7 +14,7 @@ class FooterModule:
         footer_frame.grid(row=self.row_start, column=self.col_start, columnspan=self.col_span, sticky="ew")
         footer_label = ttk.Label(
             footer_frame,
-            text="AutomaTEA Ticket Software | By Eduardo Valdebenito | December, 2024 | V2.1.1",
+            text="AutomaTEA Ticket Software | By Eduardo Valdebenito | December, 2024 | V3.0.1",
             font=("Arial", 10, "italic"),
             anchor="center",
         )

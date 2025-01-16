@@ -1,0 +1,24 @@
+[
+    {
+        "name": "Client A",
+        "siems": [
+            "Splunk",
+            "QRadar"
+        ],
+        "tucs": [
+            "TUC123",
+            "TUC456"
+        ]
+    },
+    {
+        "name": "Client B",
+        "siems": [
+            "LogRhythm",
+            "Elastic"
+        ],
+        "tucs": [
+            "TUC789",
+            "TUC101"
+        ]
+    }
+]

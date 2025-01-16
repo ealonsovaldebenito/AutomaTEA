@@ -1,30 +1,25 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, simpledialog
+from tkinter import ttk, filedialog, messagebox
 import re
 import json
 from datetime import datetime
 
 
 class EditorModule:
-    def __init__(self, parent, row_start, col_start, col_span, row_span, data_manager, history_module, json_path="tickets.json"):
+    def __init__(self, parent, row_start, col_start, col_span, row_span, data_manager, history_module, timer_module, json_path="tickets.json"):
         self.parent = parent
         self.row_start = row_start
         self.col_start = col_start
         self.col_span = col_span
         self.row_span = row_span
         self.data_manager = data_manager
-        self.history_module = history_module  # Referencia al módulo de historial
+        self.history_module = history_module
+        self.timer_module = timer_module
         self.editor_box = None
         self.template_combo = None
-        self.extract_fields_module = None
         self.json_path = json_path
 
-    def set_extract_fields_module(self, extract_fields_module):
-        """Enlaza el módulo ExtractFieldsModule al EditorModule."""
-        self.extract_fields_module = extract_fields_module
-
     def build(self):
-        # Crear el marco principal
         frame = ttk.LabelFrame(self.parent, text="Ticket Editor")
         frame.grid(
             row=self.row_start,
@@ -56,82 +51,96 @@ class EditorModule:
         button_frame = ttk.Frame(frame)
         button_frame.grid(row=2, column=0, columnspan=2, pady=10)
         ttk.Button(button_frame, text="Save", command=self.save_ticket).pack(side="left", padx=5)
+        ttk.Button(button_frame, text="Update", command=self.update_ticket).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Clear", command=self.clear_editor).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Load", command=self.load_ticket).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Defang", command=self.apply_defang).pack(side="left", padx=5)
         ttk.Button(button_frame, text="Undo Defang", command=self.undo_defang).pack(side="left", padx=5)
 
     def load_template_content(self, event):
-        """Carga el contenido de una plantilla seleccionada."""
-        try:
-            templates = self.data_manager.get_templates()
-            content = next((tmpl["content"] for tmpl in templates if tmpl.get("name") == self.template_combo.get()), "")
-            self.editor_box.delete("1.0", tk.END)
-            self.editor_box.insert("1.0", content)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load template content: {e}")
+        templates = self.data_manager.get_templates()
+        content = next((tmpl["content"] for tmpl in templates if tmpl.get("name") == self.template_combo.get()), "")
+        self.editor_box.delete("1.0", tk.END)
+        self.editor_box.insert("1.0", content)
 
     def save_ticket(self):
-        """Guarda un ticket en formato JSON y opcionalmente como archivo TXT."""
-        try:
-            content = self.editor_box.get("1.0", tk.END).strip()
-            if not content:
-                messagebox.showwarning("Warning", "Editor is empty!")
-                return
+        content = self.editor_box.get("1.0", tk.END).strip()
+        if not content:
+            messagebox.showwarning("Warning", "Editor is empty!")
+            return
 
-            # Extraer automáticamente los parámetros del contenido
-            extracted_data = self.extract_fields(content)
-            if not extracted_data:
-                messagebox.showerror("Error", "Failed to extract required fields from content!")
-                return
+        extracted_data = self.extract_fields(content)
+        time_worked = self.get_time_worked()
 
-            # Completar ticket_data con los parámetros extraídos
-            ticket_data = {
-                "ticket_number": extracted_data.get("Ticket Number"),
-                "client": extracted_data.get("Account"),
-                "short_description": extracted_data.get("Short Description"),
-                "tuc": extracted_data.get("TUC"),
-                "severity": int(extracted_data.get("Severity", 1)),
-                "assigned_to": extracted_data.get("Assigned To"),
-                "content": content,  # Guardar el contenido completo sin eliminar datos
-                "parsed_info": "\n".join([f"{k}: {v}" for k, v in extracted_data.items() if v]),
-                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            }
+        ticket_data = {
+            "ticket_number": extracted_data.get("Ticket Number"),
+            "client": extracted_data.get("Account"),
+            "short_description": extracted_data.get("Short Description"),
+            "tuc": extracted_data.get("TUC"),
+            "severity": int(extracted_data.get("Severity", 1)),
+            "assigned_to": extracted_data.get("Assigned To"),
+            "timezone": extracted_data.get("Timezone"),
+            "time_worked": time_worked,
+            "content": content,
+            "created_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "updated_timestamp": None,
+        }
 
-            # Validar campos requeridos
-            if not ticket_data["ticket_number"] or not ticket_data["client"]:
-                messagebox.showerror("Error", "Ticket Number and Client are required fields!")
-                return
+        if not ticket_data["ticket_number"] or not ticket_data["client"]:
+            messagebox.showerror("Error", "Ticket Number and Client are required fields!")
+            return
 
-            # Validar si ya existe el ticket
-            if self.is_ticket_duplicate(ticket_data):
-                # Preguntar si desea sobrescribir
-                overwrite = messagebox.askyesno(
-                    "Overwrite Ticket",
-                    f"Ticket '{ticket_data['ticket_number']}' for client '{ticket_data['client']}' already exists.\nDo you want to overwrite it?",
-                )
-                if overwrite:
-                    self.overwrite_ticket(ticket_data)
-                else:
-                    return
-            else:
-                # Guardar en JSON
-                self.save_to_json(ticket_data)
+        if self.is_ticket_duplicate(ticket_data):
+            messagebox.showerror("Error", f"Ticket {ticket_data['ticket_number']} already exists!")
+            return
 
-            # Actualizar el módulo de historial
-            self.history_module.update_history_list()
+        # Save the ticket
+        self.save_to_json(ticket_data)
 
-            # Guardar como TXT
-            if messagebox.askyesno("Save as TXT", "Do you want to save this ticket as a .txt file?"):
-                self.save_to_txt(content)
+        # Refresh the history module
+        self.history_module.load_tickets()  # Reload tickets from JSON
+        self.history_module.update_history_list()  # Refresh the UI
 
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to save ticket: {e}")
+        # Pause the timer and open checklist
+        self.pause_timer()
+        self.open_checklist_window(ticket_data)
+
+        messagebox.showinfo("Success", "Ticket saved successfully!")
+
+
+    def update_ticket(self):
+        content = self.editor_box.get("1.0", tk.END).strip()
+        if not content:
+            messagebox.showwarning("Warning", "Editor is empty!")
+            return
+
+        extracted_data = self.extract_fields(content)
+        time_worked = self.get_time_worked()
+
+        ticket_data = {
+            "ticket_number": extracted_data.get("Ticket Number"),
+            "client": extracted_data.get("Account"),
+            "short_description": extracted_data.get("Short Description"),
+            "tuc": extracted_data.get("TUC"),
+            "severity": int(extracted_data.get("Severity", 1)),
+            "assigned_to": extracted_data.get("Assigned To"),
+            "timezone": extracted_data.get("Timezone"),
+            "time_worked": time_worked,
+            "content": content,
+            "updated_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        if not self.is_ticket_duplicate(ticket_data):
+            messagebox.showerror("Error", f"Ticket {ticket_data['ticket_number']} does not exist for updating!")
+            return
+
+        self.overwrite_ticket(ticket_data)
+        self.history_module.update_history_list()
+        messagebox.showinfo("Success", "Ticket updated successfully!")
 
     def is_ticket_duplicate(self, ticket_data):
-        """Verifica si un ticket ya existe basado en número y cliente."""
-        existing_tickets = self.data_manager.get_tickets()
-        for ticket in existing_tickets:
+        tickets = self.data_manager.get_tickets()
+        for ticket in tickets:
             if (
                 ticket.get("ticket_number") == ticket_data["ticket_number"]
                 and ticket.get("client") == ticket_data["client"]
@@ -139,75 +148,166 @@ class EditorModule:
                 return True
         return False
 
+    def open_checklist_window(self, ticket_data):
+        checklist_window = tk.Toplevel(self.parent)
+        checklist_window.title("Checklist")
+        checklist_window.geometry("600x600")
+        checklist_window.transient(self.parent)
+        checklist_window.grab_set()
+        checklist_window.update_idletasks()
+        
+        screen_width = checklist_window.winfo_screenwidth()
+        screen_height = checklist_window.winfo_screenheight()
+        x = (screen_width // 2) - (600 // 2)
+        y = (screen_height // 2) - (600 // 2)
+        checklist_window.geometry(f"600x600+{x}+{y}")
+        checklist_window.attributes("-alpha", 0.0)
+        checklist_window.after(50, lambda: checklist_window.attributes("-alpha", 1.0))
+
+        frame = ttk.Frame(checklist_window, padding=10)
+        frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        ttk.Label(frame, text="Checklist Options", font=("Arial", 16, "bold")).pack(pady=10)
+
+        options = [
+            "Pull Logs",
+            "Triage",
+            "Investigation",
+            "Historical Search",
+            "Additional Search",
+            "Osint",
+            "Escalated",
+            "Email",
+            "Phone Call",
+        ]
+
+        selected_options = []
+
+        def toggle_option(option):
+            if option in selected_options:
+                selected_options.remove(option)
+            else:
+                selected_options.append(option)
+            summary_var.set(", ".join(selected_options))
+
+        checklist_frame = ttk.Frame(frame)
+        checklist_frame.pack(fill="both", expand=True, pady=10)
+
+        col1_frame = ttk.Frame(checklist_frame)
+        col1_frame.pack(side="left", fill="y", padx=5, expand=True)
+
+        col2_frame = ttk.Frame(checklist_frame)
+        col2_frame.pack(side="left", fill="y", padx=5, expand=True)
+
+        for i, option in enumerate(options):
+            target_frame = col1_frame if i % 2 == 0 else col2_frame
+            ttk.Checkbutton(target_frame, text=option, command=lambda opt=option: toggle_option(opt)).pack(anchor="w", pady=2)
+
+        summary_var = tk.StringVar(value="")
+        summary_frame = ttk.LabelFrame(frame, text="Summary", labelanchor="n")
+        summary_frame.pack(fill="x", padx=10, pady=10)
+
+        summary_box = ttk.Entry(summary_frame, textvariable=summary_var, state="readonly", font=("Arial", 10))
+        summary_box.pack(fill="x", padx=10, pady=5)
+
+        ttk.Button(summary_frame, text="Copy", command=lambda: self.copy_to_clipboard(summary_var.get())).pack(side="right", padx=10)
+
+        details_frame = ttk.LabelFrame(frame, text="Ticket Details", labelanchor="n")
+        details_frame.pack(fill="x", padx=10, pady=10)
+
+        ttk.Label(details_frame, text="Ticket Number:", font=("Arial", 10)).grid(row=0, column=0, sticky="w", padx=10, pady=5)
+        ttk.Label(details_frame, text=ticket_data.get("ticket_number", "N/A"), font=("Arial", 10)).grid(row=0, column=1, sticky="w", padx=10)
+
+        ttk.Label(details_frame, text="Client:", font=("Arial", 10)).grid(row=1, column=0, sticky="w", padx=10, pady=5)
+        ttk.Label(details_frame, text=ticket_data.get("client", "N/A"), font=("Arial", 10)).grid(row=1, column=1, sticky="w", padx=10)
+
+        ttk.Label(details_frame, text="Short Description:", font=("Arial", 10)).grid(row=2, column=0, sticky="w", padx=10, pady=5)
+        ttk.Label(details_frame, text=ticket_data.get("short_description", "N/A"), font=("Arial", 10)).grid(row=2, column=1, sticky="w", padx=10)
+
+        ttk.Label(details_frame, text="Time Worked:", font=("Arial", 10)).grid(row=3, column=0, sticky="w", padx=10, pady=5)
+        ttk.Label(details_frame, text=ticket_data.get("time_worked", "00:00:00"), font=("Arial", 10, "bold")).grid(row=3, column=1, sticky="w", padx=10)
+
+        ttk.Button(frame, text="Submit", command=lambda: checklist_window.destroy()).pack(side="bottom", pady=10)
+
+    def copy_to_clipboard(self, text):
+        self.parent.clipboard_clear()
+        self.parent.clipboard_append(text)
+        self.parent.update()
+        messagebox.showinfo("Copied", "Summary copied to clipboard!")
+
+    def save_to_json(self, ticket_data):
+        tickets = self.data_manager.get_tickets()
+        tickets.append(ticket_data)
+        self.data_manager._save_json(self.json_path, tickets)
+
     def overwrite_ticket(self, ticket_data):
-        """Sobrescribe un ticket existente con nuevos datos."""
         tickets = self.data_manager.get_tickets()
         for index, ticket in enumerate(tickets):
             if (
                 ticket.get("ticket_number") == ticket_data["ticket_number"]
                 and ticket.get("client") == ticket_data["client"]
             ):
-                tickets[index] = ticket_data
+                tickets[index].update(ticket_data)
                 self.data_manager._save_json(self.json_path, tickets)
-                messagebox.showinfo("Success", "Ticket overwritten successfully!")
                 return
 
+    def pause_timer(self):
+        if self.timer_module and self.timer_module.timer_running:
+            self.timer_module.pause_timer()
+
+    def get_time_worked(self):
+        return self.timer_module.get_time_worked() if self.timer_module else "00:00:00"
+
     def extract_fields(self, content):
-        """Extrae campos clave del contenido del editor."""
-        try:
-            pattern = r"(?P<key>[\w\s]+):\s*(?P<value>[^\n]+)"
-            matches = re.findall(pattern, content)
-            return {key.strip(): value.strip() for key, value in matches}
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to extract fields: {e}")
-            return {}
-
-    def save_to_json(self, ticket_data):
-        """Guarda el ticket en un archivo JSON."""
-        try:
-            tickets = self.data_manager.get_tickets()
-            tickets.append(ticket_data)
-            self.data_manager._save_json(self.json_path, tickets)
-            messagebox.showinfo("Success", "Ticket saved to JSON successfully!")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to save ticket to JSON: {e}")
-
-    def save_to_txt(self, content):
-        """Guarda el contenido del ticket como archivo TXT."""
-        try:
-            file_path = filedialog.asksaveasfilename(defaultextension=".txt", initialdir="./tickets/")
-            if file_path:
-                with open(file_path, "w", encoding="utf-8") as file:
-                    file.write(content)
-                messagebox.showinfo("Success", "Ticket saved as TXT successfully!")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to save ticket as TXT: {e}")
+        pattern = r"(?P<key>[\w\s]+):\s*(?P<value>[^\n]+)"
+        matches = re.findall(pattern, content)
+        return {key.strip(): value.strip() for key, value in matches}
 
     def clear_editor(self):
-        """Limpia el contenido del editor."""
         self.editor_box.delete("1.0", tk.END)
 
     def load_ticket(self):
-        """Carga un archivo de texto en el editor."""
         file_path = filedialog.askopenfilename(initialdir="./tickets/")
         if file_path:
-            try:
-                with open(file_path, "r", encoding="utf-8") as file:
-                    self.editor_box.delete("1.0", tk.END)
-                    self.editor_box.insert("1.0", file.read())
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to load ticket: {e}")
-
+            with open(file_path, "r", encoding="utf-8") as file:
+                self.editor_box.delete("1.0", tk.END)
+                self.editor_box.insert("1.0", file.read())
     def apply_defang(self):
-        """Aplica defang al contenido del editor."""
-        self._transform_text(lambda x: x.replace(".", "[.]").replace("http", "hxxp"))
+        try:
+            # Obtener el rango seleccionado
+            start = self.editor_box.index("sel.first")
+            end = self.editor_box.index("sel.last")
+            selected_text = self.editor_box.get(start, end)
+
+            # Reemplazar los patrones en el texto seleccionado
+            defanged_text = selected_text.replace(".", "[.]").replace("http", "hxxp")
+            
+            # Reemplazar el texto seleccionado con el texto defanged
+            self.editor_box.delete(start, end)
+            self.editor_box.insert(start, defanged_text)
+        except tk.TclError:
+            messagebox.showwarning("Warning", "No text selected! Please select a portion of text to apply defang.")
 
     def undo_defang(self):
-        """Revierte defang en el contenido del editor."""
-        self._transform_text(lambda x: x.replace("[.]", ".").replace("hxxp", "http"))
+        try:
+            # Obtener el rango seleccionado
+            start = self.editor_box.index("sel.first")
+            end = self.editor_box.index("sel.last")
+            selected_text = self.editor_box.get(start, end)
 
-    def _transform_text(self, transform_func):
-        """Transforma el contenido del editor usando una función dada."""
-        content = self.editor_box.get("1.0", tk.END).strip()
-        self.editor_box.delete("1.0", tk.END)
-        self.editor_box.insert("1.0", transform_func(content))
+            # Revertir los patrones en el texto seleccionado
+            undefanged_text = selected_text.replace("[.]", ".").replace("hxxp", "http")
+            
+            # Reemplazar el texto seleccionado con el texto undefanged
+            self.editor_box.delete(start, end)
+            self.editor_box.insert(start, undefanged_text)
+        except tk.TclError:
+            messagebox.showwarning("Warning", "No text selected! Please select a portion of text to undo defang.")
+
+    def center_window(self, window, width, height):
+        window.update_idletasks()
+        screen_width = window.winfo_screenwidth()
+        screen_height = window.winfo_screenheight()
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        window.geometry(f"{width}x{height}+{x}+{y}")
